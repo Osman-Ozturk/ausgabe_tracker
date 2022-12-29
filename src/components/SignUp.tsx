@@ -1,11 +1,8 @@
-import { Button, Form, Input, InputNumber ,message, Space } from "antd";
-import { AxiosResponse } from "axios";
+import { Button, Form, Input  } from "antd";
 import { useNavigate } from "react-router-dom";
 import api from "../utils/api";
+import showError from "../utils/showError";
 
-const showError = (errorMessager:string) => {
-  message.error(errorMessager);
-};
 
 function SignUp() {
   const navigate = useNavigate()
@@ -28,7 +25,7 @@ function SignUp() {
   const onFinish = async (values: any) => {
     try {
       await api.post('/users/register',values)
-      navigate('/login')
+      navigate('/login',{ replace:true })
     } catch (error) {
       console.log({error});
       showError((error as any).response.data.errorMessage)
