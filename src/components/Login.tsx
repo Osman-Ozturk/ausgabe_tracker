@@ -1,28 +1,39 @@
-import { Button, Form, Input ,Result} from "antd";
-import { useLocation, useNavigate } from "react-router-dom";
-import api from "../utils/api";
+import { Form, Input, Result, Button } from "antd";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {  useLocation, useNavigate } from "react-router-dom";
+import { AppState } from "../store";
+import { login } from "../store/actions/userActions";
+import { LoginForm } from "../types/user";
 import showError from "../utils/showError";
+import showSuccess from "../utils/showSuccess";
 
-const Login = () => {
-  const navigate = useNavigate()
-  const location =useLocation()
-  console.log(location);
-  
-  const onFinish =async (values: any) => {
-    try {
-      console.log("Success:", values);
-      await api.post('/users/login',values)
-      navigate('/')
-    } catch (error) {
-      console.log({error});
-      
-    }
-};
+function Login() {
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const navigate =useNavigate()
 
-const onFinishFailed = (errorInfo: any) => {
-        console.log("Failed:", errorInfo);
-        showError(errorInfo)
+  const { data, loading, error } = useSelector((state: AppState) => state.user);
+
+  const onFinish = (values: LoginForm) => {
+    (login(values));
   };
+
+  useEffect(() => {
+    error && showError(error);
+  }, [error]);
+
+  useEffect(() => {
+    data.username && showSuccess("You have successfully logged in!");
+  }, [data.username]);
+
+   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/");
+    }
+  }, [data]); 
+
   return (
     <Form
       name="basic"
@@ -30,12 +41,10 @@ const onFinishFailed = (errorInfo: any) => {
       wrapperCol={{ span: 16 }}
       initialValues={{ remember: true }}
       onFinish={onFinish}
-      onFinishFailed={onFinishFailed}
-      autoComplete="off"
+      //   onFinishFailed={onFinishFailed}
     >
-
-<h2 style={{textAlign :"center",marginBottom :"40px"}}>Please Login</h2>
-{location.state?.newSignUp && (
+      <h2 style={{ textAlign: "center", marginBottom: 40 }}>Please login</h2>
+      {location.state?.newSignUp && (
         <Result
           status="success"
           title="You successfully signed up!"
@@ -58,8 +67,6 @@ const onFinishFailed = (errorInfo: any) => {
         <Input.Password />
       </Form.Item>
 
-     
-
       <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
         <Button type="primary" htmlType="submit">
           Submit
@@ -67,6 +74,6 @@ const onFinishFailed = (errorInfo: any) => {
       </Form.Item>
     </Form>
   );
-};
+}
 
 export default Login;
